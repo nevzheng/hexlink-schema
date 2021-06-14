@@ -180,6 +180,12 @@ components:
       maxLength: 6
     Redirect:
       type: object
+      required:
+        - id
+        - redirectCode
+        - url
+        - timeCreated
+        - hits
       properties:
         id:
           type: string
@@ -196,10 +202,17 @@ components:
           format: int32
     RedirectArray:
       type: array
+      required:
+        - items
       items:
         $ref: "#/components/schemas/Redirect"
     User:
       type: object
+      required:
+        - id
+        - name
+        - email
+        - redirectsCreated
       properties:
         id:
           type: string
@@ -215,6 +228,9 @@ components:
           $ref: "#/components/schemas/RedirectArray"
     UserPost:
       type: object
+      required:
+        - name
+        - email
       properties:
         name:
           type: string

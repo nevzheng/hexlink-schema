@@ -5,8 +5,238 @@ info:
 servers:
   - url: https://api.server.test/v1
 paths:
-  /test:
+  /users:
+    post:
+      summary: Add a new User with a provided Usern Name nand Email, and an empty collection of Redirects
+      requestBody:
+        description: Contains a Username and Email
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPost"
+      responses:
+        "201":
+          description: User Created
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
     get:
+      summary: Search for a user using the provided Email
+      parameters:
+        - in: query
+          name: email
+          schema:
+            type: string
+            format: email
       responses:
         "200":
-          description: OK
+          $ref: "#/components/responses/200UserFound"
+        "404":
+          description: User Not Found
+
+  /users/{userId}/redirects:
+    parameters:
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: the user's id
+    post:
+      summary: Append a Redirect to a User's collection of Redirects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Redirect"
+      responses:
+        "201":
+          description: Redirect Appended
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
+    put:
+      summary: Set a User's collection of Redirects to the request body
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Redirect"
+      responses:
+        "200":
+          description: "User redirects updated"
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
+
+  /redirects/createRedirects:
+    post:
+      summary: "Post a collection of URLs, returning the Redirects"
+      requestBody:
+        description: An Array of URLs to shorten
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/URL"
+      responses:
+        "200":
+          description: "Successes and Failures from Shortening a Set of URLs."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successful:
+                    $ref: "#/components/schemas/RedirectArray"
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          $ref: "#/components/schemas/URL"
+                        reason:
+                          type: string
+                          maxLength: 100
+  /redirects/queryRedirects:
+    post:
+      summary: "Post a Collection of Codes, returning the Redirects"
+      requestBody:
+        description: An Array of Codes to Query
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RedirectArray"
+      responses:
+        "200":
+          description: "Successes and Failures from Querying a set of Redirects"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successful:
+                    $ref: "#/components/schemas/RedirectArray"
+                  failed:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          $ref: "#/components/schemas/Code"
+                        reason:
+                          type: string
+                          maxLength: 100
+
+  /redirects:
+    get:
+      summary: Get a Redirect by Code
+      parameters:
+        - in: query
+          name: redirectCode
+          schema:
+            $ref: "#/components/schemas/Code"
+      responses:
+        "200":
+          $ref: "#/components/responses/200RedirectFound"
+        "404":
+          $ref: "#/components/responses/404RedirectNotFound"
+
+  /{code}:
+    get:
+      summary: Follow a redirect
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            $ref: "#/components/schemas/Code"
+      responses:
+        "302":
+          description: Redirect Found
+          headers:
+            Location:
+              schema:
+                $ref: "#/components/schemas/URL"
+
+        "404":
+          $ref: "#/components/responses/404RedirectNotFound"
+
+components:
+  schemas:
+    URL:
+      type: string
+      format: uri
+    Code:
+      type: string
+      minLength: 6
+      maxLength: 6
+    Redirect:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        redirectCode:
+          $ref: "#/components/schemas/Code"
+        url:
+          $ref: "#/components/schemas/URL"
+        timeCreated:
+          type: string
+          format: date-time
+        hits:
+          type: integer
+          format: int32
+    RedirectArray:
+      type: array
+      items:
+        $ref: "#/components/schemas/Redirect"
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        redirectsCreated:
+          $ref: "#/components/schemas/RedirectArray"
+    UserPost:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          maxLength: 254
+  responses:
+    200UserFound:
+      description: User Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/User"
+    200RedirectFound:
+      description: Redirect Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Redirect"
+    404RedirectNotFound:
+      description: Redirect Not Found
+    500InternalServerError:
+      description: Internal Server Error

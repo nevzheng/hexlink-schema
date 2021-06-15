@@ -156,6 +156,7 @@ paths:
         "404":
           $ref: "#/components/responses/404RedirectNotFound"
     post:
+      operationId: createRedirect
       summary: Shorten a URL, returning a redirect Code
       parameters:
         - in: query
@@ -174,6 +175,7 @@ paths:
 
   /{code}:
     get:
+      operationId: followRedirect
       summary: Follow a redirect
       parameters:
         - in: path

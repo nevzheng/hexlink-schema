@@ -148,6 +148,22 @@ paths:
           $ref: "#/components/responses/200RedirectFound"
         "404":
           $ref: "#/components/responses/404RedirectNotFound"
+    post:
+      summary: Shorten a URL, returning a redirect Code
+      parameters:
+        - in: query
+          name: url
+          schema:
+            $ref: "#/components/schemas/URL"
+      responses:
+        "201":
+          description: "Redirect Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Redirect"
+        "500":
+          $ref: "#/components/responses/500InternalServerError"
 
   /{code}:
     get:

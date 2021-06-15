@@ -7,6 +7,7 @@ servers:
 paths:
   /users:
     post:
+      operationId: createUser
       summary: Add a new User with a provided Usern Name nand Email, and an empty collection of Redirects
       requestBody:
         description: Contains a Username and Email
@@ -21,6 +22,7 @@ paths:
         "500":
           $ref: "#/components/responses/500InternalServerError"
     get:
+      operationId: getUserByEmail
       summary: Search for a user using the provided Email
       parameters:
         - in: query
@@ -44,6 +46,7 @@ paths:
           format: uuid
         description: the user's id
     post:
+      operationId: appendToUserRedirects
       summary: Append a Redirect to a User's collection of Redirects
       requestBody:
         required: true
@@ -57,6 +60,7 @@ paths:
         "500":
           $ref: "#/components/responses/500InternalServerError"
     put:
+      operationId: setUserRedirects
       summary: Set a User's collection of Redirects to the request body
       requestBody:
         required: true
@@ -74,6 +78,7 @@ paths:
 
   /redirects/createRedirects:
     post:
+      operationId: createRedirectsBatch
       summary: "Post a collection of URLs, returning the Redirects"
       requestBody:
         description: An Array of URLs to shorten
@@ -106,6 +111,7 @@ paths:
                           maxLength: 100
   /redirects/queryRedirects:
     post:
+      operationId: getRedirectsBatch
       summary: "Post a Collection of Codes, returning the Redirects"
       requestBody:
         description: An Array of Codes to Query
@@ -137,6 +143,7 @@ paths:
 
   /redirects:
     get:
+      operationId: getRedirectByCode
       summary: Get a Redirect by Code
       parameters:
         - in: query
